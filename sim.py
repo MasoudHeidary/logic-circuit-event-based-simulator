@@ -215,11 +215,10 @@ class Sim:
             if not self._change_flag():
                 break
 
-
-    
+ 
 
 if __name__ == "__main__":
-    input = L
+    input = H
 
     w0 = Wire()
     p0 = PMOS()
@@ -253,23 +252,28 @@ if __name__ == "__main__":
     #     if not change_flag():
     #         break
 
-    def netlist():
-        w0[0] = input
-        w1[0] = p0.output
-        w1[1] = n0.output
+    # def netlist():
+    #     w0[0] = input
+    #     w1[0] = p0.output
+    #     w1[1] = n0.output
 
-        p0.input = H
-        p0.gate = w0.output
+    #     p0.input = H
+    #     p0.gate = w0.output
 
-        n0.input = L
-        n0.gate = w0.output
+    #     n0.input = L
+    #     n0.gate = w0.output
 
-    def output():
-        w1.output
+    # def output():
+    #     w1.output
 
-    sim = Sim([w0, w1, p0, n0], netlist, output)
-    sim.solve()
-    print(w1.output)
+    # sim = Sim([w0, w1, p0, n0], netlist, output)
+    # sim.solve()
+    # print(w1.output)
+
+
+    N = Not()
+    N.input = input
+    print(N.output)
 
 
 
