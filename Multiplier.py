@@ -166,12 +166,16 @@ class MP4():
 
         for lay in range(3):
             for i in range(4):
-                self.gfa[lay*4 + i].A = self.gand[lay*4 + i].output
+                __A = self.gand[lay*4 + i].output
                 if lay != 0:
-                    self.gfa[lay*4 + i].B = self.gfa[(lay-1)*4 + i + 1].sum if (i!=3) else self.gfa[(lay-1)*4 + i].carry
+                    __B = self.gfa[(lay-1)*4 + i + 1].sum if (i!=3) else self.gfa[(lay-1)*4 + i].carry
                 else:
-                    self.gfa[lay*4 + i].B = self.gand[3*4 + i + 1].output if (i!=3) else L
-                self.gfa[lay*4 + i].C = self.gfa[lay*4 + i - 1].carry if (i!=0) else L
+                    __B = self.gand[3*4 + i + 1].output if (i!=3) else L
+                __C = self.gfa[lay*4 + i - 1].carry if (i!=0) else L
+
+                self.gfa[lay*4 + i].A = __A
+                self.gfa[lay*4 + i].B = __B
+                self.gfa[lay*4 + i].C = __C
 
 
         self.__output[0] = self.gand[3*4 + 0].output
@@ -194,6 +198,94 @@ class MP4():
         while self.change_flag:
             self.netlist()
         return self.__output
+
+
+
+
+# Multiplier 4 bit
+class MP4_manipulated():
+
+    def __init__(self) -> None:
+        self.A = [N for _ in range(4)]
+        self.B = [N for _ in range(4)]
+        self.__output = [N for _ in range(8)]
+
+        self.gand = [And() for _ in range(4*4)]
+        self.gfa = [FA() for _ in range(3*4)]
+
+        self.elements = self.gand + self.gfa
+
+    
+    def netlist(self):
+        
+        for lay in range(3):
+            for i in range(4):
+                self.gand[lay*4 + i].A = self.A[i]
+                self.gand[lay*4 + i].B = self.B[lay + 1]
+
+        lay = 3
+        for i in range(4):
+            self.gand[lay*4 + i].A = self.A[i]
+            self.gand[lay*4 + i].B = self.B[0]
+
+
+        for lay in range(3):
+            for i in range(4):
+                __A = __B = __C = 0
+
+                __A = self.gand[lay*4 + i].output
+                if lay != 0:
+                    __B = self.gfa[(lay-1)*4 + i + 1].sum if (i!=3) else self.gfa[(lay-1)*4 + i].carry
+                else:
+                    __B = self.gand[3*4 + i + 1].output if (i!=3) else L
+                __C = self.gfa[lay*4 + i - 1].carry if (i!=0) else L
+
+
+                # rewiring
+                # flip BC {1, 2, 6, 10}
+                # flip AC {0, 3, 7, 11}
+                if ((lay*4 + i) in [1, 2, 6, 10]):
+                    self.gfa[lay*4 + i].A = __A
+                    self.gfa[lay*4 + i].B = __C
+                    self.gfa[lay*4 + i].C = __B
+                elif ((lay*4 + i) in [0, 3, 7, 11]):
+                    self.gfa[lay*4 + i].A = __C
+                    self.gfa[lay*4 + i].B = __B
+                    self.gfa[lay*4 + i].C = __A
+                else:
+                    self.gfa[lay*4 + i].A = __A
+                    self.gfa[lay*4 + i].B = __B
+                    self.gfa[lay*4 + i].C = __C
+        
+
+
+        self.__output[0] = self.gand[3*4 + 0].output
+        self.__output[1] = self.gfa[0*4 + 0].sum
+        self.__output[2] = self.gfa[1*4 + 0].sum
+        self.__output[3] = self.gfa[2*4 + 0].sum
+        self.__output[4] = self.gfa[2*4 + 1].sum
+        self.__output[5] = self.gfa[2*4 + 2].sum
+        self.__output[6] = self.gfa[2*4 + 3].sum
+        self.__output[7] = self.gfa[2*4 + 3].carry
+
+
+    @property
+    def change_flag(self):
+        return any([i.change_flag for i in self.elements])
+    
+    @property
+    def output(self):
+        self.netlist()
+        while self.change_flag:
+            self.netlist()
+        return self.__output
+
+
+
+
+
+def __test_MP4():
+    pass
 
 
 if __name__ == "__main__":

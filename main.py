@@ -37,7 +37,7 @@ def MP4_counter(module: MP4):
 
 
 
- """
+"""
 counter_list = []
 for A in range(0xF + 1):
     for B in range(0xF + 1):
@@ -56,45 +56,10 @@ for A in range(0xF + 1):
 
 print(min(counter_list))
 print(max(counter_list))
- """
+"""
 
 
-def counter(ll):
-    count_dict = {}
 
-    for i in ll:
-        if str(i) in count_dict:
-            count_dict[str(i)] += 1
-        else:
-            count_dict[str(i)] = 1
-        
-    return count_dict
-
-
-input_patterns = []
-for A in range(0xF+1):
-    for B in range(0xF+1):
-        def _(x):
-            return list(map(int, format(x, '04b')))
-        input_patterns += [{'A': _(A), 'B': _(B)}]
-
-
-# find the most common pattern in the last FA in critical path
-gnum = 1    # gate number
-output = []
-for pattern in input_patterns:
-    mp4 = MP4()
-
-    mp4.A = pattern['A']
-    mp4.B = pattern['B'] 
-
-    mp4.output
-
-    # print(mp4.gfa[gnum].sum, mp4.gfa[gnum].carry)
-    # output += [[mp4.gfa[gnum].A, mp4.gfa[gnum].B, mp4.gfa[gnum].C]]
-    print(f"{mp4.A}, {mp4.B}, => {mp4.output}")
-    output += [mp4.output[0]]
-print(counter(output))
 
 
 
