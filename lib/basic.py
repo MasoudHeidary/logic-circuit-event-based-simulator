@@ -8,7 +8,7 @@ N = 2
 X = 3
 
 class Signal:
-    def __init__(self, t = 0, value = N) -> None:
+    def __init__(self, t = 0, value = X) -> None:
         self.t = t
         self.value = value
 
@@ -38,6 +38,7 @@ class Buf:
             self.input,
             self.pd
         ]
+        return data
     
     @property
     def change_flag(self):
@@ -59,15 +60,27 @@ class Buf:
         self.__output.t = self.input.t + self.pd
 
 
+class Not:
+    def __init__(self, pd=0) -> None:
+        self.input = Signal()
+        self.pd = pd
+        self.__output = Signal()
+
+        self.__old_data = []
+
+    # @property
+    # def data_list(self):
+    #     data
+
 
 # using it interactively
-buf = Buf(pd=10)
+# buf = Buf(pd=10)
 
-buf.input = Signal(value=L)
-print(buf.output)
+# buf.input = Signal(value=L)
+# print(buf.output)
 
-buf.input = Signal(value=H)
-print(buf.output)
+# buf.input = Signal(value=H)
+# print(buf.output)
 
 
 
