@@ -19,7 +19,7 @@ def circuit(input):
 
 
 sim.input_pattern = in_pattern
-output = sim.run(circuit)
+output = sim.run(circuit, in_pattern)
 
 # print(output)
 

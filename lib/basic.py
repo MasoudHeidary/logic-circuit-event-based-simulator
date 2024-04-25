@@ -123,13 +123,11 @@ class Simulator:
 
     def __init__(self) -> None:
         self.t = 0
-        self.input_pattern = None
         
-    def run(self, func):
+    def run(self, func, input):
         self.output_buf = []
-        for pattern in self.input_pattern:
+        for pattern in input:
             self.output_buf += func(pattern)
-            # print(self.output_buf, "\t\tNEW:", func(pattern))
         return self.output_buf
 
     
