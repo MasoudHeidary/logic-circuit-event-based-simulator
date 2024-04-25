@@ -1,4 +1,4 @@
-
+import copy
 from typing import Any
 
 
@@ -118,6 +118,23 @@ class Not:
 # ---------------------
 import matplotlib.pyplot as plt 
 from typing import List
+
+class Pattern:
+    def __init__(self) -> None:
+        self.t = 0
+        self.v = X
+
+        self.__pattern = []
+
+    def get_data(self):
+        return self.__pattern
+
+
+    def delay(self, t):
+        self.__pattern += [Signal(t=self.t, value=self.v)]
+        self.t += t
+    
+
 
 class Simulator:
 

@@ -2,14 +2,21 @@ import csim
 sim = csim.Simulator()
 
 
-in_pattern = [
-    csim.Signal(0, csim.L),
-    csim.Signal(10, csim.H),
-    csim.Signal(20, csim.H),
-    csim.Signal(30, csim.H),
-    csim.Signal(40, csim.L),
-    csim.Signal(50, csim.L),
-]
+# generating the input pattern
+def input_pattern():
+    in_pattern = csim.Pattern()
+    in_pattern.v = 0
+    in_pattern.delay(10)
+    in_pattern.v = 1
+    in_pattern.delay(10)
+    in_pattern.delay(10)
+    in_pattern.delay(10)
+    in_pattern.v = 0
+    in_pattern.delay(10)
+    in_pattern.delay(10)
+
+    return in_pattern.get_data()
+input_pattern = input_pattern()
 
 def circuit(input):
     not_gate = csim.Not(pd=10)
@@ -18,16 +25,10 @@ def circuit(input):
 
 
 
-sim.input_pattern = in_pattern
-output = sim.run(circuit, in_pattern)
+output = sim.run(circuit, input_pattern)
 
-# print(output)
-
-# sim.plot(sim.input_pattern, "input")
-# sim.plot(sim.output_pattern, "Not Output")
-# sim.show_plot()
 
 sim.plot(
-    signal=[in_pattern, output],
+    signal=[input_pattern, output],
     label=["input, not output"]
 )
