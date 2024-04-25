@@ -52,7 +52,7 @@ class Buf:
     def output(self):
         while self.change_flag:
             self.netlist()
-        return self.__output
+        return self.__output.copy()
 
 
     def netlist(self):
@@ -68,9 +68,39 @@ class Not:
 
         self.__old_data = []
 
-    # @property
-    # def data_list(self):
-    #     data
+    @property
+    def data_list(self):
+        data = [
+            self.input,
+            self.pd
+        ]
+        return data
+    
+    @property
+    def change_flag(self):
+        data = self.data_list
+        if (data == self.__old_data):
+            return False
+        self.__old_data = data
+        return True
+    
+    @property
+    def output(self):
+        while self.change_flag:
+            self.netlist()
+        return self.__output.copy()
+    
+    def netlist(self):
+        # logic
+        if self.input.value in [L, H]:
+            self.__output.value = not self.input.value
+        else:
+            self.__output.value = self.input.value
+
+        # timing
+        self.__output.t = self.input.t + self.pd
+    
+    
 
 
 # using it interactively
@@ -94,19 +124,26 @@ class Simulator:
     def __init__(self) -> None:
         self.t = 0
         self.input_pattern = None
-        self.output_pattern = []
         
     def run(self, func):
-        
+        self.output_buf = []
         for pattern in self.input_pattern:
-            self.output_pattern += func(pattern)
+            self.output_buf += func(pattern)
+            # print(self.output_buf, "\t\tNEW:", func(pattern))
+        return self.output_buf
 
     
-    def plot(self, signal: List[Signal], label=""):
+    def __plot_data_process(self, signal: List[Signal]):
         #TODO: add X and N in singnal output
         plot_time = []
         plot_value = []
         
+
+        # fill signal from 0 to initial value
+        zero_sig = signal[0]
+        if zero_sig.t != 0:
+            signal.insert(0, Signal(t=0, value=X))
+
         for index, sig in enumerate(signal):
             sig: Signal
             
@@ -121,40 +158,73 @@ class Simulator:
             else:
                     plot_time += [sig.t]
                     plot_value += [sig.value]
+
+        # place X as 0.5 in value
+        for index, pv in enumerate(plot_value):
+            if pv in [X, N]:
+                plot_value[index] = 0.5
+
+        return (plot_time, plot_value)
+
+
+    # def plot(self, signal: List[Signal], label=""):
+        
+    #     plot_data = self.__plot_data_process(signal)
             
-        plt.plot(plot_time, plot_value, label=label)
+    #     plt.plot(plot_data[0], plot_data[1], label=label, linewidth=2.5)
+    #     plt.legend()
+    #     plt.show()
+
+    def plot(self, *args, **kwargs):
+        number_of_signals = len(kwargs['signal'])
+
+        for col in range(number_of_signals):
+            plot_data = self.__plot_data_process(
+                kwargs['signal'][col]
+            )
+
+            plt.subplot(number_of_signals, 1, col + 1)
+            plt.plot(
+                plot_data[0], 
+                plot_data[1], 
+                label=kwargs.get('label') or "",
+                linewidth=kwargs.get("linewidth") or 2.5
+            )
+        
         plt.legend()
         plt.show()
+
+    
 
         
 
 
-def input_pattern_generator():
-    data = [
-        Signal(t=0, value=H),
-        Signal(t=10, value=L),
-        Signal(t=20, value=H),
-        Signal(t=30, value=H),
-        Signal(t=40, value=H),
-        Signal(t=50, value=H),
-        Signal(t=60, value=H),
-    ]
-    return data
+# def input_pattern_generator():
+#     data = [
+#         Signal(t=0, value=H),
+#         Signal(t=10, value=L),
+#         Signal(t=20, value=H),
+#         Signal(t=30, value=H),
+#         Signal(t=40, value=H),
+#         Signal(t=50, value=H),
+#         Signal(t=60, value=H),
+#     ]
+#     return data
 
-def Main(input: Signal):
-    buf = Buf(pd=10)
-    buf.input = input
+# def Main(input: Signal):
+#     buf = Buf(pd=10)
+#     buf.input = input
     
-    buf_out = buf.output
+#     buf_out = buf.output
 
-    return [buf_out]
+#     return [buf_out]
 
-sim = Simulator()
-sim.input_pattern = input_pattern_generator()
-sim.run(Main)
+# sim = Simulator()
+# sim.input_pattern = input_pattern_generator()
+# sim.run(Main)
 
-print(sim.output_pattern)
-sim.plot(sim.output_pattern, "buf output")
+# print(sim.output_pattern)
+# sim.plot(sim.output_pattern, "buf output")
 
 
 
