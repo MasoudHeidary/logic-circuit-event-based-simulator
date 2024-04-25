@@ -10,14 +10,6 @@ for A in range(0xF + 1):
 
 
 
-
-
-
-
-
-
-
-
 class MPCounter:
     def __init__(self) -> None:
         self.tgate_counter = [[0 for j in range(6)] for i in range(12)]
