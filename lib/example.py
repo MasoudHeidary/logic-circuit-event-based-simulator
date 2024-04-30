@@ -32,3 +32,5 @@ sim.plot(
     signal=[input_pattern, output],
     label=["input, not output"]
 )
+
+print("DONE")
