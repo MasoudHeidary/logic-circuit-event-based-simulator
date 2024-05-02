@@ -21,7 +21,6 @@ class _v:
         return [self.H, self.L]
     
 V = _v()
-print(V.valid)
 
 
 # signal (voltage, time)
