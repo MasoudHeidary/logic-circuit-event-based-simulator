@@ -1,10 +1,8 @@
-from basic_gate import *
-from typing import Any
-
-
-# ---------------------
-import matplotlib.pyplot as plt 
 from typing import List
+import matplotlib.pyplot as plt 
+
+from csig import *
+
 
 class Pattern:
     def __init__(self) -> None:
@@ -127,7 +125,6 @@ class Simulator:
 
 # print(sim.output_pattern)
 # sim.plot(sim.output_pattern, "buf output")
-
 
 
 

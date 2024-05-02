@@ -38,7 +38,7 @@ class Signal:
         return str({'t': self.t, 'value': self.value})
     
     def copy(self) -> object:
-        return Signal(self.t, self.value)
+        return Signal(self.value, self.t)
     
 
 # dynamic signal, user friendly
@@ -63,3 +63,6 @@ class DSignal:
     def N(self):
         return Signal(V.N, self.t)
 
+
+if __name__ == "__main__":
+    pass
