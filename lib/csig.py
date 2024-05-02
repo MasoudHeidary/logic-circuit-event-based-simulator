@@ -16,7 +16,12 @@ class _v:
     def N(self):
         return 3
     
+    @property
+    def valid(self):
+        return [self.H, self.L]
+    
 V = _v()
+print(V.valid)
 
 
 # signal (voltage, time)
