@@ -20,6 +20,24 @@ class _v:
     def valid(self):
         return [self.H, self.L]
     
+    def all(self, data):
+        if self.X in data:
+            return self.X
+        
+        _data = [i for i in data if i in self.valid]
+        if len(_data) == 0:
+            return self.N
+        return self.H if all(_data) else self.L
+    
+    def any(self, data):
+        if self.X in data:
+            return self.X
+        
+        _data = [i for i in data if i in self.valid]
+        if len(_data) == 0:
+            return self.N
+        return self.H if any(_data) else self.L
+    
 V = _v()
 
 

@@ -4,8 +4,8 @@ from csig import *
 # single input, single output
 class GateBase:
 
-    def __init__(self) -> None:
-        self.input = input
+    def __init__(self, input=False) -> None:
+        self.input = Signal() if input==False else input
         self.pd = 0
         self.output_buf = Signal()
         
@@ -39,9 +39,9 @@ class GateBase:
 
 #  multi input, signle output
 class SemiComplexGateBase(GateBase):
-    def __init__(self, in_len=2) -> None:
-        super().__init__()
-        self.input = [Signal() for _ in  range(in_len)]
+    def __init__(self, input=False, in_len=2) -> None:
+        super().__init__(input=input)
+        self.input = [Signal() for _ in  range(in_len)] if input==False else input
         # NO CHANGE in output (a single output)
         # NO CHANGE in data_list to watch
 
@@ -50,8 +50,8 @@ class SemiComplexGateBase(GateBase):
 
 # multi input, multi output
 class ComplexGateBase(SemiComplexGateBase):
-    def __init__(self, in_len = 2, out_len = 1) -> None:
-        super().__init__(in_len=in_len)
+    def __init__(self, input=False, in_len=2, out_len=1) -> None:
+        super().__init__(input=input, in_len=in_len)
         self.output_buf = [Signal() for _ in range(out_len)]
         # NO CHANGE in data_list to watch
 
