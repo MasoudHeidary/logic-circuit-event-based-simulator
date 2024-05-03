@@ -1,58 +1,119 @@
 from cgatebase import *
 
 
-class NMOS(SemiComplexGateBase):
-    def __init__(self, input=Signal(), gate=Signal(), pd=0) -> None:
-        self.input = input
-        self.gate = gate
-        super().__init__([self.input, self.gate], in_len=2)
-        self.pd = pd
+class NMOS(GateBase):
+    def __init__(self, IN=Signal(), GATE=Signal(), tpd=0) -> None:
+        super().__init__()
+        self.IN = IN
+        self.GATE = GATE
+        self.tpd = tpd
+
+        self.__out_buf = Signal()
+
+    @property
+    def data_list(self):
+        return [self.IN, self.GATE]
+
+    @property
+    def OUT(self):
+        self.run()
+        return self.__out_buf.copy()
 
     def netlist(self):
         # timing
-        gate_t = self.gate.t
-        input_t = self.input.t
-        self.output_buf.t = max(gate_t, input_t) + self.pd
+        input_t = [self.GATE.t, self.IN.t]
+        self.__out_buf.t = max(input_t) + self.tpd
 
         # logic
-        g_value = self.gate.value
+        g_value = self.GATE.value
         if g_value == V.H:
-            self.output_buf.value = self.input.value
+            self.__out_buf.value = self.IN.value
+        elif g_value == V.L:
+            self.__out_buf.value = V.N
         else:
-            self.output_buf.value = V.N
+            self.__out_buf.value = self.GATE.value
 
 
-class PMOS(SemiComplexGateBase):
-    def __init__(self, input=Signal(), gate=Signal(), pd=0) -> None:
-        super().__init__([input, gate], in_len=2)
-        self.input = input
-        self.gate = gate
-        self.pd = pd
+class PMOS(GateBase):
+    def __init__(self, IN=Signal(), GATE=Signal(), tpd=0) -> None:
+        super().__init__()
+        self.IN = IN
+        self.GATE = GATE
+        self.tpd = tpd
+
+        self.__out_buf = Signal()
+
+    @property
+    def data_list(self):
+        return [self.IN, self.GATE]
+    
+    @property
+    def OUT(self):
+        self.run()
+        return self.__out_buf.copy()
 
     def netlist(self):
         #timing
-        gate_t = self.gate.t
-        input_t = self.input.t
-        self.output_buf.t = max(gate_t, input_t) + self.pd
+        input_t = [self.GATE.t, self.IN.t]
+        self.__out_buf.t = max(input_t) + self.tpd
 
         # logic
-        g_value = self.gate.value
+        g_value = self.GATE.value
         if g_value == V.L:
-            self.output_buf.value = self.input.value
+            self.__out_buf.value = self.IN.value
+        elif g_value == V.H:
+            self.__out_buf.value = V.N
         else:
-            self.output_buf.value = V.N
+            self.__out_buf.value = self.GATE.value
 
 
 
 
 
 
-x = NMOS()
-d = DSignal()
+##################################### TEST
+def test_nmos():
+    nmos = NMOS(tpd=10)
 
-x.input = d.L
-x.gate = d.H
-print(x.output)
+    input = [
+        [Signal(V.L, 10), Signal(V.H, 0),],
+        [Signal(V.L, 20), Signal(V.L, 0),],
+        [Signal(V.H, 30), Signal(V.H, 0),],
+        [Signal(V.H, 40), Signal(V.L, 0),],
+        [Signal(V.X, 50), Signal(V.L, 0),],
+        [Signal(V.L, 60), Signal(V.X, 0),],
+    ]
 
-x.gate = d.L
-print(x.output)
+    output = [
+        Signal(V.N, 20),
+        Signal(V.N, 30),
+        Signal(V.H, 40),
+        Signal(V.L, 50),
+        Signal(V.X, 60),
+        Signal(V.N, 70),
+    ]
+
+    for in_index, in_value in enumerate(input):
+        nmos.GATE = in_value[0]
+        nmos.IN = in_value[1]
+        
+        out = nmos.OUT
+        xout = output[in_index]
+        if out != xout:
+            print(f"{in_value} \t=> NMOS =>\t {out} (expected: {xout}) [FALSE]")
+            return False
+        else:
+            print(f"{in_value} \t=> NMOS =>\t {out} \t[TRUE]")
+    return True
+
+
+
+if __name__ == "__main__":
+    test_list = [
+        ('NMOS', test_nmos),
+    ]
+
+    print("RUNNING TEST")
+    for name, func in test_list:
+        print(f"{name} \t[{func()}]")
+##################################### END TEST
