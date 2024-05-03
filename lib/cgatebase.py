@@ -15,7 +15,7 @@ class GateBase:
         new_data = self.data_list
         if (new_data == self.__old_data):
             return False
-        self.__old_data = new_data
+        self.__old_data = new_data.copy()
         return True
     
     def run(self):

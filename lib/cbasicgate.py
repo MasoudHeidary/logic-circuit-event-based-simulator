@@ -81,31 +81,32 @@ class Buf(GateBase):
 #         input_value = [i.value for i in self.input]
 #         self.output_buf.value = V.all(input_value)
 
+class And(GateBase):
+    def __init__(self, IN=False, in_len=2, tpd=0) -> None:
+        super().__init__()
+        self.IN = [Signal() for _ in range(in_len)] if IN==False else IN
+        self.tpd = tpd
 
-# def test_and():
-#     A = Signal(V.H, 0)
-#     B = [
-#         Signal(V.L, 0),
-#         Signal(V.H, 10),
-#         Signal(V.H, 20),
-#         Signal(V.L, 30)
-#     ]
+        self.__out_buf = Signal()
 
-#     output = [
-#         Signal(V.L, 10),
-#         Signal(V.H, 20),
-#         Signal(V.H, 30),
-#         Signal(V.L, 40),
-#     ]
+    @property
+    def data_list(self):
+        return self.IN
+    
+    @property
+    def OUT(self):
+        self.run()
+        return self.__out_buf
+    
+    def netlist(self):
+        input_time = [i.t for i in self.IN]
+        self.__out_buf.t = max(input_time) + self.tpd
+        
+        input_value = [i.value for i in self.IN]
+        self.__out_buf.value = V.all(input_value)
 
-#     for B_index, B_value in enumerate(B):
-#         gand = And(input=[A, B_value],in_len=2, pd=10)
-#         if gand.output != output[B_index]:
-#             print(f"{A}, {B_value} \t=> AND =>\t {gand.output} (expected: {output[B_index]}) [FALSE]")
-#             return False
-#         else:
-#             print(f"{A}, {B_value} \t=> AND =>\t {gand.output} \t[TRUE]")
-#     return True
+
+
 
 ################################# TEST
 def test_buf():
@@ -138,15 +139,47 @@ def test_buf():
     return True
 
 
+def test_and():
+    gand = And(tpd=10)
+
+    input = [
+        (Signal(V.L, 0), Signal(V.L, 10)),
+        (Signal(V.L, 0), Signal(V.H, 20)),
+        (Signal(V.H, 0), Signal(V.H, 30)),
+        (Signal(V.H, 0), Signal(V.L, 40)),
+        (Signal(V.X, 0), Signal(V.H, 50)),
+        (Signal(V.N, 0), Signal(V.H, 60)),
+    ]
+    output = [
+        Signal(V.L, 20),
+        Signal(V.L, 30),
+        Signal(V.H, 40),
+        Signal(V.L, 50),
+        Signal(V.X, 60),
+        Signal(V.H, 70),
+    ]
+
+    for in_index, in_value in enumerate(input):
+        gand.IN[0] = in_value[0]
+        gand.IN[1] = in_value[1]
+        if gand.OUT != output[in_index]:
+            print(f"{in_value[0]}, {in_value[1]} \t=> AND =>\t {gand.OUT} (expected: {output[in_index]}) [FALSE]")
+            return False
+        else:
+            print(f"{in_value[0]}, {in_value[1]} \t=> AND =>\t {gand.OUT} \t[TRUE]")
+    return True
+
+
 if __name__ == "__main__":
     test_list = [
-        ('BUFFER', test_buf)
+        ('BUFFER', test_buf),
+        ('AND', test_and),
     ]
 
     print("RUNNING TEST")
     for name, func in test_list:
         print(f"{name} \t[{func()}]")
-    # test_and()   
+    # t 
 ################################# END TEST
 
 
