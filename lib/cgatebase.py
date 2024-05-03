@@ -5,8 +5,7 @@ from csig import *
 class GateBase:
 
     def __init__(self, input=False) -> None:
-        self.input = Signal() if input==False else input
-        self.pd = 0
+        self._input = Signal() if input==False else input
         self.output_buf = Signal()
         
         self.__old_data = None
@@ -14,8 +13,7 @@ class GateBase:
     @property
     def data_list(self):
         data = [
-            self.input,
-            self.pd
+            self._input,
         ]
         return data
 
@@ -37,15 +35,15 @@ class GateBase:
         pass
 
 
+
 #  multi input, signle output
 class SemiComplexGateBase(GateBase):
     def __init__(self, input=False, in_len=2) -> None:
         super().__init__(input=input)
-        self.input = [Signal() for _ in  range(in_len)] if input==False else input
+        self._input = [Signal() for _ in  range(in_len)] if input==False else input
         # NO CHANGE in output (a single output)
         # NO CHANGE in data_list to watch
 
-    
 
 
 # multi input, multi output

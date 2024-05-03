@@ -29,10 +29,10 @@ def test_buf():
     for in_index, in_value in enumerate(input):
         buf.input = in_value
         if buf.output != output[in_index]:
-            print(f"{in_value} => BUF => {buf.output} (expected: {output[in_index]}) [FALSE]")
+            print(f"{in_value} \t=> BUF =>\t {buf.output} (expected: {output[in_index]}) [FALSE]")
             return False
         else:
-            print(f"{in_value} => BUF => {buf.output} [TRUE]")
+            print(f"{in_value} \t=> BUF =>\t {buf.output} \t[TRUE]")
     return True
 
 
@@ -112,13 +112,13 @@ def test_and():
     for B_index, B_value in enumerate(B):
         gand = And(input=[A, B_value],in_len=2, pd=10)
         if gand.output != output[B_index]:
-            print(f"{A}, {B_value} => AND => {gand.output} (expected: {output[B_index]}) [FALSE]")
+            print(f"{A}, {B_value} \t=> AND =>\t {gand.output} (expected: {output[B_index]}) [FALSE]")
             return False
         else:
-            print(f"{A}, {B_value} => AND => {gand.output} [TRUE]")
+            print(f"{A}, {B_value} \t=> AND =>\t {gand.output} \t[TRUE]")
     return True
 
 
 if __name__ == "__main__":
     test_buf()
-    test_and()
+    test_and()    
