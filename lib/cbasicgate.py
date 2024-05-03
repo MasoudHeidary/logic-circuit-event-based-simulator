@@ -15,14 +15,48 @@ class Buf(GateBase):
     @property
     def OUT(self):
         self.run()
-        return self.__out_buf
+        return self.__out_buf.copy()
 
     def netlist(self):
         self.__out_buf.t = self.IN.t + self.tpd     # timing
-        self.__out_buf.value = self.IN.value        # logic
+        self.__out_buf.v = self.IN.v        # logic
 
 
 
+class Wire(GateBase):
+    def __init__(self, IN=False, in_len=1, tpd=0) -> None:
+        super().__init__()
+        self.IN = [Signal() for _ in range(in_len)] if IN==False else IN
+        self.tpd = tpd
+
+        self.__out_buf = Signal()
+
+    @property
+    def data_list(self):
+        return self.IN + [self.tpd]
+    
+
+    @property
+    def OUT(self):
+        self.run()
+        return self.__out_buf.copy()
+    
+    def netlist(self):
+        #timing
+
+        # logic
+        input_v = [i.v for i in self.IN]
+        valid_input_v = V.get_valid(input_v)
+        if V.X in input_v:
+            self.__out_buf.v = V.X
+        elif not V.all_same(valid_input_v):
+            self.__out_buf.v = V.X
+        elif len(valid_input_v) == 0:
+            self.__out_buf.v = V.N
+        else:
+            self.__out_buf.v = valid_input_v[0]
+
+        
 
 
 
@@ -102,8 +136,8 @@ class And(GateBase):
         input_time = [i.t for i in self.IN]
         self.__out_buf.t = max(input_time) + self.tpd
         
-        input_value = [i.value for i in self.IN]
-        self.__out_buf.value = V.all(input_value)
+        input_value = [i.v for i in self.IN]
+        self.__out_buf.v = V.all(input_value)
 
 
 
