@@ -15,11 +15,16 @@ class GateBase:
         new_data = self.data_list
         if (new_data == self.__old_data):
             return False
-        self.__old_data = new_data.copy()
+        # self.__old_data = new_data.copy()     # don't change the flag, just checking the flag
         return True
     
+    def update_flag(self):
+        new_data = self.data_list
+        self.__old_data = new_data
+
     def run(self):
         while self.change_flag:
+            self.update_flag()
             self.netlist()
 
     def netlist(self):
@@ -40,7 +45,9 @@ class Gate(GateBase):
         if(new_data != self.__old_data):
             self.__old_data = new_data.copy()
             return True
-        elif(any([i.change_flag for i in self.element_list])):
+        
+        flag_lst = [i.change_flag for i in self.element_list]
+        if(any(flag_lst)):
             return True
         return False
             
