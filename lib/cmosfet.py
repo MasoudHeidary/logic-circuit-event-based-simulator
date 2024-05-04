@@ -104,11 +104,11 @@ class Not(Gate):
 
 
 class Transmission(Gate):
-    def __init__(self, IN=False, PIn=False, NIn=False) -> None:
+    def __init__(self, IN=Signal(), PIn=Signal(), NIn=Signal()) -> None:
         super().__init__()
-        self.IN = Signal() if IN==False else IN
-        self.PIn = Signal() if PIn==False else PIn
-        self.NIn = Signal() if NIn==False else NIn
+        self.IN = IN
+        self.PIn = PIn
+        self.NIn = NIn
         
         self.p = PMOS()
         self.n = NMOS()
@@ -138,6 +138,101 @@ class Transmission(Gate):
         self.w.IN[0] = self.p.OUT
         self.w.IN[1] = self.n.OUT
         self.__out_buf = self.w.OUT
+
+class FA(Gate):
+    def __init__(self, A=Signal(), B=Signal(), C=Signal()) -> None:
+        super().__init__()
+        self.A = A
+        self.B = B
+        self.C = C
+
+        self.g_not_a = Not()
+        self.g_not_b = Not()
+        self.g_not_c = Not()
+
+        self.g_not_xx = Not()
+        self.g_tra_xx = [Transmission() for _ in range(2)]
+        self.w_xx = Wire(in_len=2)
+
+        self.g_tra_sum = [Transmission() for _ in range(2)]
+        self.w_sum = Wire(in_len=2)
+        self.g_tra_carry = [Transmission() for _ in range(2)]
+        self.w_carry = Wire(in_len=2)
+    
+        self.__sum = Signal()
+        self.__carry = Signal()
+
+    @property
+    def data_list(self):
+        return [self.A, self.B, self.C]
+    @property
+    def element_list(self):
+        _data = [
+            self.g_not_a, self.g_not_b, self.g_not_c, self.g_not_xx,
+            self.w_xx, self.w_sum, self.w_carry,
+        ] \
+        + self.g_tra_xx \
+        + self.g_tra_sum \
+        + self.g_tra_carry
+        return _data
+    
+
+    @property
+    def sum(self):
+        self.run()
+        return self.__sum.copy()
+    @property
+    def carry(self):
+        self.run()
+        return self.__carry.copy()
+    
+    def netlist(self):
+        self.g_not_a.IN = self.A
+        self.g_not_b.IN = self.B
+        self.g_not_c.IN = self.C
+
+        # not of inputs
+        self.nA = self.g_not_a.OUT
+        self.nB =  self.g_not_b.OUT
+        self.nC = self.g_not_c.OUT
+
+        # xx
+        self.g_tra_xx[0].IN = self.A
+        self.g_tra_xx[0].PIn = self.B
+        self.g_tra_xx[0].NIn = self.nB
+        self.w_xx.IN[0] = self.g_tra_xx[0].OUT
+        self.g_tra_xx[1].IN = self.nA
+        self.g_tra_xx[1].PIn = self.nB
+        self.g_tra_xx[1].NIn = self.B
+        self.w_xx.IN[1] = self.g_tra_xx[1].OUT
+        self.xx = self.w_xx.OUT
+
+        # nxx
+        self.g_not_xx.IN = self.xx
+        self.nxx = self.g_not_xx.OUT
+
+        # sum
+        self.g_tra_sum[0].IN = self.C
+        self.g_tra_sum[0].PIn = self.xx
+        self.g_tra_sum[0].NIn = self.nxx
+        self.w_sum.IN[0] = self.g_tra_sum[0].OUT
+        self.g_tra_sum[1].IN = self.nC
+        self.g_tra_sum[1].PIn = self.nxx
+        self.g_tra_sum[1].NIn = self.xx
+        self.w_sum.IN[1] = self.g_tra_sum[1].OUT
+        self.__sum = self.w_sum.OUT
+
+        # carry
+        self.g_tra_carry[0].IN = self.C
+        self.g_tra_carry[0].PIn = self.nxx
+        self.g_tra_carry[0].NIn = self.xx
+        self.w_carry.IN[0] = self.g_tra_carry[0].OUT
+        self.g_tra_carry[1].IN = self.A
+        self.g_tra_carry[1].PIn = self.xx
+        self.g_tra_carry[1].NIn = self.nxx
+        self.w_carry.IN[1] = self.g_tra_carry[1].OUT
+        self.__carry = self.w_carry.OUT
+
 
 
 
@@ -207,10 +302,51 @@ def test_not():
     return True
 
 
+def test_FA():
+    g_FA = FA()
+
+    input = [
+        [Signal(V.L), Signal(V.L), Signal(V.L)],
+        [Signal(V.L), Signal(V.L), Signal(V.H)],
+        [Signal(V.L), Signal(V.H), Signal(V.L)],
+        [Signal(V.L), Signal(V.H), Signal(V.H)],
+        [Signal(V.H), Signal(V.L), Signal(V.L)],
+        [Signal(V.H), Signal(V.L), Signal(V.H)],
+        [Signal(V.H), Signal(V.H), Signal(V.L)],
+        [Signal(V.H), Signal(V.H), Signal(V.H)],
+    ]
+    output = [
+        [Signal(V.L), Signal(V.L)],
+        [Signal(V.L), Signal(V.H)],
+        [Signal(V.L), Signal(V.H)],
+        [Signal(V.H), Signal(V.L)],
+        [Signal(V.L), Signal(V.H)],
+        [Signal(V.H), Signal(V.L)],
+        [Signal(V.H), Signal(V.L)],
+        [Signal(V.H), Signal(V.H)],
+    ]
+
+    for in_index, in_value in enumerate(input):
+        g_FA.A = in_value[0]
+        g_FA.B = in_value[1]
+        g_FA.C = in_value[2]
+        
+        sum = g_FA.sum
+        carry = g_FA.carry
+        out = [carry, sum]
+        xout = output[in_index]
+        if out != xout:
+            print(f"{in_value} \t=> NOT =>\t {out} (expected: {xout}) [FALSE]")
+            return False
+        else:
+            print(f"{in_value} \t=> NOT =>\t {out} \t[TRUE]")
+    return True
+
 if __name__ == "__main__":
     test_list = [
         ('NMOS', test_nmos),
         ('NOT', test_not),
+        ('FA', test_FA)
     ]
 
     print("RUNNING TEST")
