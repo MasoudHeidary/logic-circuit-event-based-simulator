@@ -4,20 +4,20 @@ import matplotlib.pyplot as plt
 from csig import *
 
 
-class Pattern:
-    def __init__(self) -> None:
-        self.t = 0
-        self.v = X
+# class Pattern:
+#     def __init__(self) -> None:
+#         self.t = 0
+#         self.v = X
 
-        self.__pattern = []
+#         self.__pattern = []
 
-    def get_data(self):
-        return self.__pattern
+#     def get_data(self):
+#         return self.__pattern
 
 
-    def delay(self, t):
-        self.__pattern += [Signal(t=self.t, value=self.v)]
-        self.t += t
+#     def delay(self, t):
+#         self.__pattern += [Signal(t=self.t, value=self.v)]
+#         self.t += t
     
 
 

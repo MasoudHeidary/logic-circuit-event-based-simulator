@@ -336,10 +336,10 @@ def test_FA():
         out = [carry, sum]
         xout = output[in_index]
         if out != xout:
-            print(f"{in_value} \t=> NOT =>\t {out} (expected: {xout}) [FALSE]")
+            print(f"{in_value} \t=> FA =>\t {out} (expected: {xout}) [FALSE]")
             return False
         else:
-            print(f"{in_value} \t=> NOT =>\t {out} \t[TRUE]")
+            print(f"{in_value} \t=> FA =>\t {out} \t[TRUE]")
     return True
 
 if __name__ == "__main__":
