@@ -58,8 +58,11 @@ class Signal:
             return True
         return False
     
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         return str({'t': self.t, 'v': self.v})
+
+    def __repr__(self) -> str:
+        return str((self.t, self.v))
     
     def copy(self) -> object:
         return Signal(self.v, self.t)

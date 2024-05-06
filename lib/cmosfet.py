@@ -275,6 +275,66 @@ class FA(Gate):
 
 
 
+class Multiplier(Gate):
+    def __init__(self, A=False, B=False, in_len=8) -> None:
+        super().__init__()
+        self.in_len = in_len
+        self.A = [Signal() for _ in range(in_len)] if A==False else A
+        self.B = [Signal() for _ in range(in_len)] if B==False else B
+        self.__out = [Signal() for _ in range(in_len*2)]
+
+        self.gfa = [[FA() for _ in range(in_len)] for _ in range(in_len-1)]
+        self.gand = [[And(in_len=2) for _ in range(in_len)] for _ in range(in_len)]
+
+    @property
+    def data_list(self):
+        return self.A + self.B
+    @property
+    def element_list(self):
+        return [element for sub in self.gfa + self.gand for element in sub]
+    
+    @property
+    def OUT(self):
+        self.run()
+        return self.__out.copy()
+    
+    def netlist(self):
+        
+        # AND input map
+        for lay in range(self.in_len):
+            for i in range(self.in_len):
+                self.gand[lay][i].IN[0] = self.A[i]
+                self.gand[lay][i].IN[1] = self.B[lay]
+
+        # FA input map
+        for lay in range(self.in_len-1):
+            for i in range(self.in_len):
+                __A = self.gand[lay+1][i].OUT
+                if lay == 0:
+                    __B = self.gand[0][i+1].OUT if (i!=self.in_len-1) else Signal(v=V.L)
+                else:
+                    __B = self.gfa[lay-1][i+1].sum if (i!=self.in_len-1) else self.gfa[lay-1][i].carry
+                __C = self.gfa[lay][i-1].carry if (i!=0) else Signal(v=V.L)
+
+                self.gfa[lay][i].A = __A
+                self.gfa[lay][i].B = __B
+                self.gfa[lay][i].C = __C
+
+        # OUT map
+        self.__out[0] = self.gand[0][0].OUT
+        for lay in range(self.in_len -1):
+            self.__out[lay + 1] = self.gfa[lay][0].sum
+
+            # last layer
+            if lay == self.in_len - 2:
+                for i in range(self.in_len + 1):
+                    self.__out[lay + i + 1] = self.gfa[lay][i].sum if (i!=self.in_len) else self.gfa[lay][i-1].carry
+
+
+
+                
+
+
 
 ##################################### TEST
 def test_nmos():
@@ -419,15 +479,55 @@ def test_FA():
             print(f"{in_value} \t=> FA =>\t {out} \t[TRUE]")
     return True
 
+def test_multiplier(in_len=8):
+
+    def generate_pattern(max_num, length):
+        pattern = []
+
+        for A in range(0, max_num+1, 1):
+            for B in range(0, max_num+1, 1):
+                def _con(num, length):
+                    _d = list(map(int, reversed(format(num, f'0{length}b'))))
+                    return [Signal(v=V.H) if i==1 else Signal(v=V.L) for i in _d]
+
+                pattern += [
+                    {'A': _con(A, length), 'B':_con(B, length), 'out':_con(A*B, length*2)}
+                    ]
+        return pattern
+
+    g_multiplier = Multiplier(in_len=in_len)
+    print(">>> Generating Pattern")
+    pattern = generate_pattern(2**in_len-1, length=in_len)
+    print(">>> DONE Generating Pattern")
+    for pt in pattern:
+
+        g_multiplier.A = pt['A']
+        g_multiplier.B = pt['B']
+
+        in_value = f"A: {pt['A']}, B: {pt['B']}"
+        out = g_multiplier.OUT
+        xout = pt['out']
+        if out != xout:
+            print(f"{in_value} \t=> Multiplier =>\t {out} (expected: {xout}) [FALSE]")
+            return False
+        else:
+            print(f"{in_value} \t=> Multiplier =>\t {out} \t[TRUE]")
+    return True
+
+
+
+        
+
 if __name__ == "__main__":
     test_list = [
-        ('NMOS', test_nmos),
-        ('NOT', test_not),
-        ('AND', test_and),
-        ('FA', test_FA)
+        ('NMOS', test_nmos, {}),
+        ('NOT', test_not, {}),
+        ('AND', test_and, {}),
+        ('FA', test_FA, {}),
+        ('MULTIPLIER', test_multiplier, {'in_len': 8})
     ]
 
     print("RUNNING TEST")
-    for name, func in test_list:
-        print(f"{name} \t[{func()}]")
+    for name, func, kwargs in test_list:
+        print(f"{name} \t[{func(**kwargs)}]")
 ##################################### END TEST
