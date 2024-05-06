@@ -496,10 +496,14 @@ def test_multiplier(in_len=8):
         return pattern
 
     g_multiplier = Multiplier(in_len=in_len)
+
     print(">>> Generating Pattern")
     pattern = generate_pattern(2**in_len-1, length=in_len)
     print(">>> DONE Generating Pattern")
-    for pt in pattern:
+
+    # percentage
+    _per_len = len(pattern)
+    for pt_index, pt in enumerate(pattern):
 
         g_multiplier.A = pt['A']
         g_multiplier.B = pt['B']
@@ -511,7 +515,7 @@ def test_multiplier(in_len=8):
             print(f"{in_value} \t=> Multiplier =>\t {out} (expected: {xout}) [FALSE]")
             return False
         else:
-            print(f"{in_value} \t=> Multiplier =>\t {out} \t[TRUE]")
+            print(f"{in_value} \t=> Multiplier =>\t {out} \t[{pt_index/_per_len*100:.2f}%][TRUE]")
     return True
 
 
