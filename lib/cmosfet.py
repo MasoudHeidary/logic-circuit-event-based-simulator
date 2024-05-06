@@ -102,6 +102,46 @@ class Not(Gate):
         self.w.IN[1] = self.p.OUT
         self.__out_buf = self.w.OUT
 
+# BUG: if don't use a gate which is added, change_flag will stay True
+class And(Gate):
+    def __init__(self, IN=False, in_len=2) -> None:
+        super().__init__()
+        self.in_len = in_len
+        self.IN = [Signal() for _ in range(in_len)] if IN==False else IN
+
+        self.p = [PMOS() for _ in range(in_len)]
+        self.n = [NMOS() for _ in range(in_len)]
+        self.gnot = Not()
+        self.w = Wire(in_len= in_len+1)
+
+        self.__out = Signal()
+
+    @property
+    def data_list(self):
+        return self.IN
+    @property
+    def element_list(self):
+        return [self.gnot, self.w] + self.p + self.n
+    
+    @property
+    def OUT(self) -> Signal:
+        self.run()
+        return self.__out.copy()
+    
+    def netlist(self):
+        for i in range(self.in_len):
+            self.p[i].IN = Signal(v=V.H)
+            self.p[i].GATE = self.IN[i]
+            self.w.IN[i] = self.p[i].OUT
+
+            self.n[i].GATE = self.IN[i]
+            self.n[i].IN = Signal(v=V.L) if i==self.in_len-1 else self.n[i+1].OUT
+
+        self.w.IN[self.in_len] = self.n[0].OUT    
+        self.gnot.IN = self.w.OUT
+        self.__out = self.gnot.OUT
+
+    
 
 class Transmission(Gate):
     def __init__(self, IN=Signal(), PIn=Signal(), NIn=Signal()) -> None:
@@ -302,6 +342,43 @@ def test_not():
     return True
 
 
+def test_and():
+    g_and = And(in_len=3)
+
+    input = [
+        [Signal(v=V.L), Signal(v=V.L), Signal(v=V.L),],
+        [Signal(v=V.L), Signal(v=V.L), Signal(v=V.H),],
+        [Signal(v=V.L), Signal(v=V.H), Signal(v=V.L),],
+        [Signal(v=V.L), Signal(v=V.H), Signal(v=V.H),],
+        [Signal(v=V.H), Signal(v=V.L), Signal(v=V.L),],
+        [Signal(v=V.H), Signal(v=V.L), Signal(v=V.H),],
+        [Signal(v=V.H), Signal(v=V.H), Signal(v=V.L),],
+        [Signal(v=V.H), Signal(v=V.H), Signal(v=V.H),],
+    ]
+
+    output = [
+        Signal(v=V.L),
+        Signal(v=V.L),
+        Signal(v=V.L),
+        Signal(v=V.L),
+        Signal(v=V.L),
+        Signal(v=V.L),
+        Signal(v=V.L),
+        Signal(v=V.H),
+    ]
+
+    for in_index, in_value in enumerate(input):
+        g_and.IN = in_value
+        
+        out = g_and.OUT
+        xout = output[in_index]
+        if out != xout:
+            print(f"{in_value} \t=> AND =>\t {out} (expected: {xout}) [FALSE]")
+            return False
+        else:
+            print(f"{in_value} \t=> AND =>\t {out} \t[TRUE]")
+    return True
+
 def test_FA():
     g_FA = FA()
 
@@ -346,6 +423,7 @@ if __name__ == "__main__":
     test_list = [
         ('NMOS', test_nmos),
         ('NOT', test_not),
+        ('AND', test_and),
         ('FA', test_FA)
     ]
 
