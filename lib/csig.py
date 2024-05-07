@@ -50,8 +50,8 @@ V = _v()
 # signal (voltage, time)
 class Signal:
     def __init__(self, v = V.X, t=0) -> None:
-        self.t = t
-        self.v = v
+        self.t: int = t
+        self.v: int = v
 
     def __eq__(self, obj) -> bool:
         if ((self.t == obj.t) and (self.v == obj.v)):

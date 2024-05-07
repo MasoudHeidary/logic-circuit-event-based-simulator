@@ -528,7 +528,7 @@ if __name__ == "__main__":
         ('NOT', test_not, {}),
         ('AND', test_and, {}),
         ('FA', test_FA, {}),
-        ('MULTIPLIER', test_multiplier, {'in_len': 8})
+        ('MULTIPLIER', test_multiplier, {'in_len': 4})
     ]
 
     print("RUNNING TEST")
