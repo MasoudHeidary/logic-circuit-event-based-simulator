@@ -35,87 +35,51 @@
 # print("DONE")
 
 
-from csim import Plot, DynamicSimulator
-from cbasicgate import And, DSignal, Signal, V
+from csim import Plot
+from csig import DSignal
+from cbasicgate import And
 
 
-A = Signal()
-B = Signal()
-gand = And(IN=[A, B], in_len=2)
+# input pattern
+A = DSignal()
+B = DSignal()
 
-input_data = DynamicSimulator(sig_list=[A, B])
-output_data = DynamicSimulator()
-# input_data.save()
-# output_data.save(gand.OUT)
+A.L()
+B.L()
+A.delay(100)
+B.delay(100)
 
+A.L()
+B.H()
+A.delay(100)
+B.delay(100)
 
 A.H()
 B.H()
-A.delay(10)
-B.delay(10)
-input_data.save()
-output_data.save(gand.OUT)
-
+A.delay(100)
+B.delay(100)
 
 A.H()
 B.L()
-A.delay(10)
-B.delay(10)
-input_data.save()
-output_data.save(gand.OUT)
+A.delay(100)
+B.delay(100)
 
 
-Plot().plot(signal=[input_data.get_data()[0], input_data.get_data()[1], output_data.get_data()])
 
 
-exit()
+def circuit(A, B):
+    return And(IN=[A, B], in_len=2).OUT
+def circuit2(A, B):
+    return And(IN=[A, B], in_len=2, tpd=10).OUT
 
-A = Signal()
-B = Signal()
-gand = And(IN=[A, B], in_len=2)
-
-A.H()
-B.H()
-print(gand.OUT)
-
-exit()
-
-dsig = DSignal()
-A = []
-pA = []
-B = []
-pB = []
-out = []
-
-A = dsig.L
-pA += [A]
-B = dsig.L
-pB += [B]
-out.append(And([A, B], tpd=10).OUT)
-dsig.delay(50)
-
-A = dsig.L
-pA += [A]
-B = dsig.H
-pB += [B]
-out.append(And([A, B], tpd=10).OUT)
-dsig.delay(50)
-
-A = dsig.H
-pA += [A]
-B = dsig.L
-pB += [B]
-out.append(And([A, B], tpd=10).OUT)
-dsig.delay(50)
-
-A = dsig.H
-pA += [A]
-B = dsig.H
-pB += [B]
-out.append(And([A, B], tpd=10).OUT)
-dsig.delay(50)
-
-pA += [dsig.H]
+cir1_output = [circuit(i, j) for i, j in zip(A.get_data(), B.get_data())]
+cir2_output = [circuit2(i, j) for i, j in zip(A.get_data(), B.get_data())]
 
 
-Plot().plot(signal=[pA, pB, out], label=['A', 'B', 'output'])
+print(A.get_data())
+print(B.get_data())
+print(cir1_output)
+
+Plot().plot(signal=[A.get_data(), B.get_data(), cir1_output, cir2_output],
+label=['A', 'B', 'And', 'And(with delay)'])
+

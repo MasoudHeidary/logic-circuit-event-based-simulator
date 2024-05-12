@@ -88,51 +88,58 @@ class Plot:
             plt.plot(
                 [s.t for s in plot_data[col]],
                 [s.v for s in plot_data[col]],
-                label = kwargs.get('label') or "",
+                # label = kwargs.get('label') or "",
                 linewidth = kwargs.get('linewidth') or 2.5
             )
+            try:
+                plt.title(kwargs.get('label')[col])
+            except:
+                pass # no title for the plot
 
         plt.legend()
         plt.show()
             
 
 
+# class DynamicSimulator:
+
+#     def __init__(self, sig: Signal = False, sig_list: List[Signal] = False) -> None:
+#         self.sig = sig
+#         self.sig_list = sig_list
+
+#         self.data = []
+
+#     def save(self, input: Signal = False, input_list: List[Signal] = False):
+#         if input or input_list:
+#             if (self.sig or self.sig_list) != False:
+#                 raise RuntimeError("this simulator is saving input, create another simulator")
+#             self.data += [input.copy()]
+#         elif self.sig:
+#             self.data += [self.sig].copy()
+#         elif self.sig_list:
+#             self.data += self.sig_list.copy()
+#         else:
+#             raise RuntimeError("no data to save!")
         
-# pt = Plot()
-# clk = [Signal(t=i, v=i%2) for i in range(31)]
-# x = [Signal(V.L, 0), Signal(V.L, 10), Signal(V.H, 20), Signal(V.L, 30)]
-# trange = pt._Plot__t_range([clk, x])
-
-# xsample = pt._Plot__sampling(trange, x)
-
-# pt.plot(
-#     signal=[clk, x]
-# )
+#     def get_data(self):
+#         return self.data
 
 
-class DynamicSimulator:
+# class DynamicSimulator:
 
-    def __init__(self, sig: Signal = False, sig_list: List[Signal] = False) -> None:
-        self.sig = sig
-        self.sig_list = sig_list
+#     def __init__(self):
+#         self.data = []
 
-        self.data = []
+#     def get_data(self):
+#         return self.data
 
-    def save(self, input: Signal = False, input_list: List[Signal] = False):
-        if input or input_list:
-            if (self.sig or self.sig_list) != False:
-                raise RuntimeError("this simulator is saving input, create another simulator")
-            self.data += [input.copy()]
-        elif self.sig:
-            self.data += [self.sig].copy()
-        elif self.sig_list:
-            self.data += self.sig_list.copy()
-        else:
-            raise RuntimeError("no data to save!")
-        
-    def get_data(self):
-        return self.data
+#     def run(self, func, **kwargs):
+#         for values in zip(kwargs.values()):
+#             for i in values:
+#                 func()
 
+
+    
 
 
 # class Simulator:

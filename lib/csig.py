@@ -1,3 +1,4 @@
+from typing import List
 # signals
 
 
@@ -82,26 +83,19 @@ class Signal:
     
 
 # dynamic signal, user friendly
-class DSignal:
-    def __init__(self) -> None:
-        self.t = 0
+class DSignal(Signal):
+    def __init__(self, v=V.X, t=0) -> None:
+        super().__init__(v=v, t=t)
+        self.data: List[Signal] = []
     
-    def delay(self, t):
-        self.t += t
-    
+    def get_data(self):
+        return self.data
 
-    @property
-    def L(self):
-        return Signal(V.L, self.t)
-    @property
-    def H(self):
-        return Signal(V.H, self.t)
-    @property
-    def X(self):
-        return Signal(V.X, self.t)
-    @property
-    def N(self):
-        return Signal(V.N, self.t)
+    def delay(self, t):
+        self.data += [self.copy()]
+        self.t += t
+        self.data += [self.copy()]
+    
 
 
 if __name__ == "__main__":
