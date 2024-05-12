@@ -35,8 +35,50 @@
 # print("DONE")
 
 
-from csim import Plot
-from cbasicgate import And, DSignal
+from csim import Plot, DynamicSimulator
+from cbasicgate import And, DSignal, Signal, V
+
+
+A = Signal()
+B = Signal()
+gand = And(IN=[A, B], in_len=2)
+
+input_data = DynamicSimulator(sig_list=[A, B])
+output_data = DynamicSimulator()
+# input_data.save()
+# output_data.save(gand.OUT)
+
+
+A.H()
+B.H()
+A.delay(10)
+B.delay(10)
+input_data.save()
+output_data.save(gand.OUT)
+
+
+A.H()
+B.L()
+A.delay(10)
+B.delay(10)
+input_data.save()
+output_data.save(gand.OUT)
+
+
+Plot().plot(signal=[input_data.get_data()[0], input_data.get_data()[1], output_data.get_data()])
+
+
+exit()
+
+A = Signal()
+B = Signal()
+gand = And(IN=[A, B], in_len=2)
+
+A.H()
+B.H()
+print(gand.OUT)
+
+exit()
 
 dsig = DSignal()
 A = []

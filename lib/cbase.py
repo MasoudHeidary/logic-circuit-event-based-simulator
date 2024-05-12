@@ -110,6 +110,39 @@ class Plot:
 # )
 
 
+class DynamicSimulator:
+
+    def __init__(self, sig: Signal = False, sig_list: List[Signal] = False) -> None:
+        self.sig = sig
+        self.sig_list = sig_list
+
+        self.data = []
+
+    def save(self, input: Signal = False, input_list: List[Signal] = False):
+        if input or input_list:
+            if (self.sig or self.sig_list) != False:
+                raise RuntimeError("this simulator is saving input, create another simulator")
+            self.data += [input.copy()]
+        elif self.sig:
+            self.data += [self.sig].copy()
+        elif self.sig_list:
+            self.data += self.sig_list.copy()
+        else:
+            raise RuntimeError("no data to save!")
+        
+    def get_data(self):
+        return self.data
+
+
+
+# class Simulator:
+
+#     def __init__(self) -> None:
+#         pass
+
+#     def run(self, func, **kwargs):
+#         self.output_buf = []
+#         for pattern in 
 
 # class Simulator:
 

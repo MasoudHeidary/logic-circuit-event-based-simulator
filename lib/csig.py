@@ -67,6 +67,19 @@ class Signal:
     def copy(self) -> object:
         return Signal(self.v, self.t)
     
+    def delay(self, t):
+        self.t += t
+
+    def L(self):
+        self.v = V.L
+    def H(self):
+        self.v = V.H
+    def X(self):
+        self.v = V.X
+    def N(self):
+        self.v = V.N
+
+    
 
 # dynamic signal, user friendly
 class DSignal:
