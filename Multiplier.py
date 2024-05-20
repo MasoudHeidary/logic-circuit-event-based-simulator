@@ -243,11 +243,11 @@ class MP4_manipulated():
                 # rewiring
                 # flip BC {1, 2, 6, 10}
                 # flip AC {0, 3, 7, 11}
-                if ((lay*4 + i) in [1, 2, 6, 10]):
+                if ((lay*4 + i) in [1, 4, 5, 8, 9, 10]):
                     self.gfa[lay*4 + i].A = __A
                     self.gfa[lay*4 + i].B = __C
                     self.gfa[lay*4 + i].C = __B
-                elif ((lay*4 + i) in [0, 3, 7, 11]):
+                elif ((lay*4 + i) in [0, 11]):
                     self.gfa[lay*4 + i].A = __C
                     self.gfa[lay*4 + i].B = __B
                     self.gfa[lay*4 + i].C = __A
