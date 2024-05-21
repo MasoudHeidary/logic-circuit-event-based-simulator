@@ -130,8 +130,8 @@ class MP3:
                 __C = self.gFA[lay][i-1].carry if (i!=0) else L
 
                 self.gFA[lay][i].A = __A
-                self.gFA[lay][i].B = __C
-                self.gFA[lay][i].C = __B
+                self.gFA[lay][i].B = __B 
+                self.gFA[lay][i].C = __C 
 
 
         self.__output[0] = self.gAND[0][0].output
@@ -185,6 +185,18 @@ def test_MP():
 
 
 
+def counter(ll):
+    count_dict = {}
+
+    for i in ll:
+        if str(i) in count_dict:
+            count_dict[str(i)] += 1
+        else:
+            count_dict[str(i)] = 1
+        
+    return count_dict
+
+
 def MP3_counter(MP3_list):
     A = [0 for i in range(3)]
     B = [0 for i in range(3)]
@@ -223,9 +235,14 @@ def MP3_counter(MP3_list):
         #         gfa[i][j]['sum'] += 1 if mp3.gFA[i][j].sum else 0
         #         gfa[i][j]['carry'] += 1 if mp3.gFA[i][j].carry else 0
 
-        usr_counter += 1 if mp3.gFA[1][1].gt[0].p0.gate == L else 0
+        # condition = mp3.gFA[1][1].gt[2].p1.gate == L
+        condition = mp3.gFA[1][1].gt[0].output == H
+
+        usr_counter += 1 if condition else 0
     print(f"usr_counter: \t{usr_counter}")
 
+    # print(counter([[i.gFA[1][1].A, i.gFA[1][1].B, i.gFA[1][1].C] for i in MP3_list]))
+    print(counter([[i.gAND[1][1].output] for i in MP3_list]))
     
     print("DONE")
         
