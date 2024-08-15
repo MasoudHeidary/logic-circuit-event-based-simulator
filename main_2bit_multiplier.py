@@ -58,10 +58,16 @@ class org_FA:
         nxx = self.gnot[3].output
 
         # sum
-        self.gt[1].ctop = xx
-        self.gt[1].cmid = nxx
-        self.gt[1].itop = self.C
-        self.gt[1].ilow = nC
+        if True:                        # normal
+            self.gt[1].ctop = xx
+            self.gt[1].cmid = nxx
+            self.gt[1].itop = self.C
+            self.gt[1].ilow = nC
+        else:                           # tampered
+            self.gt[1].ctop = self.C 
+            self.gt[1].cmid = nC 
+            self.gt[1].itop = xx 
+            self.gt[1].ilow = nxx 
         self.__sum = self.gt[1].output
 
         # carry
@@ -129,9 +135,22 @@ class MP3:
                     __B = self.gFA[lay-1][i+1].sum if (i!=self.in_len-1) else self.gFA[lay-1][i].carry
                 __C = self.gFA[lay][i-1].carry if (i!=0) else L
 
-                self.gFA[lay][i].A = __A
-                self.gFA[lay][i].B = __B 
-                self.gFA[lay][i].C = __C 
+                # NORMAL
+                if False:
+                    self.gFA[lay][i].A = __A
+                    self.gFA[lay][i].B = __B 
+                    self.gFA[lay][i].C = __C 
+
+                # tampered
+                else:
+                    if (lay * self.in_len + i) in [5]:
+                        self.gFA[lay][i].A = __B 
+                        self.gFA[lay][i].B = __A 
+                        self.gFA[lay][i].C = __C
+                    else:
+                        self.gFA[lay][i].A = __A
+                        self.gFA[lay][i].B = __B 
+                        self.gFA[lay][i].C = __C
 
 
         self.__output[0] = self.gAND[0][0].output
@@ -236,13 +255,26 @@ def MP3_counter(MP3_list):
         #         gfa[i][j]['carry'] += 1 if mp3.gFA[i][j].carry else 0
 
         # condition = mp3.gFA[1][1].gt[2].p1.gate == L
-        condition = mp3.gFA[1][1].gt[0].output == H
+        # condition = mp3.gFA[0][2].gt[0].output == H
+        condition = mp3.gFA[0][2].carry == H
 
         usr_counter += 1 if condition else 0
     print(f"usr_counter: \t{usr_counter}")
 
+    # print(counter([[i.gFA[1][1].carry] for i in MP3_list]))
+
     # print(counter([[i.gFA[1][1].A, i.gFA[1][1].B, i.gFA[1][1].C] for i in MP3_list]))
-    print(counter([[i.gAND[1][1].output] for i in MP3_list]))
+    i = MP3()
+    i.gFA[1][2].gt[0].p0.gate
+    i.gFA[1][2].gt[0].p1.gate
+    i.gFA[1][2].gt[0].output
+    i.gFA[1][2].C
+    i.gFA[1][2].gt[1].p0.gate
+    i.gFA[1][2].gt[1].p1.gate
+    i.gFA[1][2].gt[2].p0.gate
+    i.gFA[1][2].gt[2].p1.gate
+    print(counter([[i.gFA[1][2].gt[0].output] for i in MP3_list]))
+    print(counter([[i.gFA[1][2].C] for i in MP3_list]))
     
     print("DONE")
         

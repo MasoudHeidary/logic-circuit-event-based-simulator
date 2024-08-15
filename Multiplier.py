@@ -243,14 +243,18 @@ class MP4_manipulated():
                 # rewiring
                 # flip BC {1, 2, 6, 10}
                 # flip AC {0, 3, 7, 11}
-                if ((lay*4 + i) in [1, 4, 5, 8, 9, 10]):
-                    self.gfa[lay*4 + i].A = __A
-                    self.gfa[lay*4 + i].B = __C
-                    self.gfa[lay*4 + i].C = __B
-                elif ((lay*4 + i) in [0, 11]):
-                    self.gfa[lay*4 + i].A = __C
-                    self.gfa[lay*4 + i].B = __B
-                    self.gfa[lay*4 + i].C = __A
+                # if ((lay*4 + i) in [1, 4, 5, 8, 9, 10]):
+                #     self.gfa[lay*4 + i].A = __A
+                #     self.gfa[lay*4 + i].B = __C
+                #     self.gfa[lay*4 + i].C = __B
+                # elif ((lay*4 + i) in [0, 11]):
+                #     self.gfa[lay*4 + i].A = __C
+                #     self.gfa[lay*4 + i].B = __B
+                #     self.gfa[lay*4 + i].C = __A
+                if (lay*4 + i) in [9]:
+                    self.gfa[lay*4 + i].A = __C 
+                    self.gfa[lay*4 + i].B = __B 
+                    self.gfa[lay*4 + i].C = __A 
                 else:
                     self.gfa[lay*4 + i].A = __A
                     self.gfa[lay*4 + i].B = __B
@@ -279,6 +283,79 @@ class MP4_manipulated():
             self.netlist()
         return self.__output
 
+
+
+
+# Multiplier n bit
+class MPn:
+    def __init__(self, in_len=8) -> None:
+        self.in_len = in_len
+        self.A = [N for _ in range(in_len)]
+        self.B = [N for _ in range(in_len)]
+        self.__output = [N for _ in range(in_len*2)]
+
+        self.gand = [And() for _ in range(in_len**2)]
+        self.gfa = [FA() for _ in range((in_len-1) * in_len)]
+
+        self.elements = self.gand + self.gfa
+
+    
+    def netlist(self):
+        
+        for lay in range(self.in_len - 1):
+            for i in range(self.in_len):
+                self.gand[lay*self.in_len + i].A = self.A[i]
+                self.gand[lay*self.in_len + i].B = self.B[lay + 1]
+
+        lay = self.in_len-1
+        for i in range(self.in_len):
+            self.gand[lay*self.in_len + i].A = self.A[i]
+            self.gand[lay*self.in_len + i].B = self.B[0]
+
+
+        for lay in range(self.in_len - 1):
+            for i in range(self.in_len):
+                __A = self.gand[lay*self.in_len + i].output
+                if lay != 0:
+                    __B = self.gfa[(lay-1)*self.in_len + i + 1].sum if (i!=(self.in_len-1)) else self.gfa[(lay-1)*self.in_len + i].carry
+                else:
+                    __B = self.gand[(self.in_len-1)*self.in_len + i + 1].output if (i!=(self.in_len-1)) else L
+                __C = self.gfa[lay*self.in_len + i - 1].carry if (i!=0) else L
+
+                self.gfa[lay*self.in_len + i].A = __A
+                self.gfa[lay*self.in_len + i].B = __B
+                self.gfa[lay*self.in_len + i].C = __C
+
+
+        # self.__output[0] = self.gand[3*4 + 0].output
+        # self.__output[1] = self.gfa[0*4 + 0].sum
+        # self.__output[2] = self.gfa[1*4 + 0].sum
+        # self.__output[3] = self.gfa[2*4 + 0].sum
+        # self.__output[4] = self.gfa[2*4 + 1].sum
+        # self.__output[5] = self.gfa[2*4 + 2].sum
+        # self.__output[6] = self.gfa[2*4 + 3].sum
+        # self.__output[7] = self.gfa[2*4 + 3].carry
+
+        self.__output[0] = self.gand[(self.in_len-1)*self.in_len + 0].output
+        for lay in range(self.in_len - 1):
+            self.__output[lay + 1] = self.gfa[lay*self.in_len + 0].sum
+
+            # last layer
+            if lay == self.in_len - 2:
+                for i in range(self.in_len + 1):
+                    self.__output[lay + i + 1] = self.gfa[lay*self.in_len + i].sum if (i!=self.in_len) else self.gfa[lay*self.in_len + i - 1].carry
+
+
+    @property
+    def change_flag(self):
+        return any([i.change_flag for i in self.elements])
+    
+    @property
+    def output(self):
+        self.netlist()
+        while self.change_flag:
+            self.netlist()
+        return self.__output
 
 
 

@@ -23,11 +23,11 @@ for A in range(0xF+1):
 
 
 # find the most common pattern in the last FA in critical path
-gnum = 0   # gate number
+gnum = 9   # gate number
 output = []
 for i in range(len(input_patterns)):
-    # mp4 = MP4()
-    mp4 = MP4_manipulated()
+    mp4 = MP4()
+    # mp4 = MP4_manipulated()
 
     mp4.A = input_patterns[i]['A']
     mp4.B = input_patterns[i]['B'] 
