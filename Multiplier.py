@@ -61,7 +61,7 @@ class FA:
         self.__sum = N
         self.__carry = N
 
-        self.ngate = [Not() for _ in range(15)]
+        self.ngate = [Not() for _ in range(4)]
         self.tgate = [Trans() for _ in range(3)]
         self.elements = self.ngate + self.tgate
 
@@ -69,50 +69,57 @@ class FA:
 
         # not A B C
         self.ngate[0].input = self.A     #nA
+        nA = self.ngate[0].output
         self.ngate[1].input = self.B     #nB
+        nB = self.ngate[1].output
         self.ngate[2].input = self.C     #nC
+        nC = self.ngate[2].output
 
 
         # generate xx signal
         self.tgate[0].ctop = self.B
-        self.tgate[0].cmid = self.ngate[1].output
+        self.tgate[0].cmid = nB
         self.tgate[0].itop = self.A
-        self.tgate[0].ilow = self.ngate[0].output
+        self.tgate[0].ilow = nA
+        xx = self.tgate[0].output
+        self.xx = xx
+
         # generate nxx signal
         self.ngate[3].input = self.tgate[0].output
-        # generate dxx
-        self.ngate[4].input = self.tgate[0].output
-        self.ngate[5].input = self.ngate[4].output
+        nxx = self.ngate[3].output
+
+        # # generate dxx
+        # self.ngate[4].input = self.tgate[0].output
+        # self.ngate[5].input = self.ngate[4].output
 
 
         # generate sum
-        self.ngate[6].input = self.ngate[2].output
-        self.ngate[7].input = self.ngate[6].output
-        self.ngate[8].input = self.ngate[7].output
+        # self.ngate[6].input = self.ngate[2].output
+        # self.ngate[7].input = self.ngate[6].output
+        # self.ngate[8].input = self.ngate[7].output
 
-        self.ngate[9].input = self.ngate[2].output
-        self.ngate[10].input = self.ngate[9].output
+        # self.ngate[9].input = self.ngate[2].output
+        # self.ngate[10].input = self.ngate[9].output
 
-        self.tgate[1].ctop = self.ngate[5].output
-        self.tgate[1].cmid = self.ngate[3].output
-        self.tgate[1].itop = self.ngate[8].output
-        self.tgate[1].ilow = self.ngate[10].output
-
+        self.tgate[1].ctop = xx
+        self.tgate[1].cmid = nxx
+        self.tgate[1].itop = self.C
+        self.tgate[1].ilow = nC
+        self.__sum = self.tgate[1].output
 
 
         # generate carry 
-        self.ngate[11].input = self.A
-        self.ngate[12].input = self.ngate[11].output
-        self.ngate[13].input = self.ngate[12].output
-        self.ngate[14].input = self.ngate[13].output
-        self.tgate[2].ctop = self.ngate[3].output
-        self.tgate[2].cmid = self.ngate[5].output
+        # self.ngate[11].input = self.A
+        # self.ngate[12].input = self.ngate[11].output
+        # self.ngate[13].input = self.ngate[12].output
+        # self.ngate[14].input = self.ngate[13].output
+        self.tgate[2].ctop = nxx
+        self.tgate[2].cmid = xx
         self.tgate[2].itop = self.C
-        self.tgate[2].ilow = self.ngate[14].output
+        self.tgate[2].ilow = self.A
+        self.__carry = self.tgate[2].output
 
         
-        self.__sum = self.tgate[1].output
-        self.__carry = self.tgate[2].output
 
 
     @property
@@ -134,6 +141,20 @@ class FA:
             self.netlist()
         return self.__carry
 
+def test_FA():
+    fa = FA()
+
+    for i in range(2):
+        for j in range(2):
+            for k in range(2):
+                fa.A = i
+                fa.B = j
+                fa.C = k
+
+                if (fa.sum == (i+j+k)%2) and (fa.carry == (i+j+k)//2):
+                    print(f"{i}, {j}, {k} \t= \t{(i+j+k)//2} \t{(i+j+k)%2} \t[TRUE]")
+                else:
+                    print("[FALSE]")
 
 
 # Multiplier 4 bit
@@ -327,15 +348,6 @@ class MPn:
                 self.gfa[lay*self.in_len + i].C = __C
 
 
-        # self.__output[0] = self.gand[3*4 + 0].output
-        # self.__output[1] = self.gfa[0*4 + 0].sum
-        # self.__output[2] = self.gfa[1*4 + 0].sum
-        # self.__output[3] = self.gfa[2*4 + 0].sum
-        # self.__output[4] = self.gfa[2*4 + 1].sum
-        # self.__output[5] = self.gfa[2*4 + 2].sum
-        # self.__output[6] = self.gfa[2*4 + 3].sum
-        # self.__output[7] = self.gfa[2*4 + 3].carry
-
         self.__output[0] = self.gand[(self.in_len-1)*self.in_len + 0].output
         for lay in range(self.in_len - 1):
             self.__output[lay + 1] = self.gfa[lay*self.in_len + 0].sum
@@ -366,30 +378,33 @@ def __test_MP4():
 
 if __name__ == "__main__":
 
-    trans = Trans()
-    trans.ctop = L
-    trans.cmid = H
-    trans.itop = L
-    trans.ilow = H
+    # trans = Trans()
+    # trans.ctop = L
+    # trans.cmid = H
+    # trans.itop = L
+    # trans.ilow = H
 
-    print(trans.output)
+    # print(trans.output)
 
-    fa = FA()
-    fa.A = H
-    fa.B = H
-    fa.C = H
-    print(fa.sum)
-    print(fa.carry)
+    # fa = FA()
+    # fa.A = H
+    # fa.B = H
+    # fa.C = H
+    # print(fa.sum)
+    # print(fa.carry)
 
 
-    m8 = MP4()
-    m8.A = [1,1,1,1]
-    m8.B = [1,1,1,1]
-    print(m8.output)
+    # m8 = MP4()
+    # m8.A = [1,1,1,1]
+    # m8.B = [1,1,1,1]
+    # print(m8.output)
 
     #TODO: add test functions
 
-
+    # test FA
+    print("### test FA")
+    test_FA()
+    print("### test FA DONE")
 
         
 
