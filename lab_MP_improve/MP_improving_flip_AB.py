@@ -1,8 +1,9 @@
-from Multiplier import *
 from typing import List
 import random
 
-
+import sys
+sys.path.insert(0, '..')
+from Multiplier import *
 
 def generate_MP_input_pattern(bit_len):
     input_pattern = []
