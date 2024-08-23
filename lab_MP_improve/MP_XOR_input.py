@@ -50,7 +50,7 @@ if False:
         # testing
         if True:
             if mp.output != pattern['output']:
-                raise
+                raise ValueError("wrong output")
             # print testing
             elif False:
                 print(f"{A} * {B} \t= {mp.output} \t[{'TRUE' if mp.output == pattern['output'] else 'FALSE'}]")
@@ -91,8 +91,22 @@ if False:
 def XOR_input(data_in):
     return [[1,0][i] for i in data_in]
 
+import random
+random.seed(0)
+def reset_random_chance():
+    random.seed(0)
+
+def get_random_chance(chance):
+    return random.random() <= chance
+
+
+
+import matplotlib.pyplot as plt
+# plot variables
+
+
 if True:
-    bit_len = 8
+    bit_len = 5
 
     stress_counter = [[{'T0':0, 'T1':0, 'T2':0} for _ in range(bit_len)] for _ in range(bit_len-1)]
     MP8_input_list = generate_MP_input_pattern(bit_len=bit_len)
@@ -111,7 +125,7 @@ if True:
         # testing
         if True:
             if mp.output != pattern['output']:
-                raise
+                raise ValueError("wrong output")
             # print testing
             elif False:
                 print(f"{A} * {B} \t= {mp.output} \t[{'TRUE' if mp.output == pattern['output'] else 'FALSE'}]")
@@ -144,5 +158,8 @@ if True:
             stress = stress_counter[lay][index]
 
             print(f"FA[{lay}][{index}]: {stress} {[i/input_len for i in stress.values()]}")
+
+
+
 
 
