@@ -150,17 +150,17 @@ if True:
             #     output = not_lst(output)
 
             # optimizer to reduce the stress
-            if XOR_percentage and (mp.gfa[4][5].tgate[1].p0.gate == L):
+            if XOR_percentage and ((mp.gfa[1][5].tgate[0].p0.gate == L) or (mp.gfa[2][5].tgate[0].p0.gate == L)):
                 # if XOR help, use XOR on input
                 not_A = not_lst(A)
                 not_B = not_lst(B)
                 mp_xor = MPn_v2(not_A, not_B, in_len=bit_len)
                 mp_xor.output
 
-                if (mp_xor.gfa[4][5].tgate[1].p0.gate == H):
+                if (mp_xor.gfa[1][5].tgate[0].p0.gate == H) and ((mp.gfa[2][5].tgate[0].p0.gate == H)):
                     mp = mp_xor
-                else:
-                    log.println(f"{A} {B} [using XOR]")
+                # else:
+                #     log.println(f"{A} {B} [using XOR]")
 
 
 
@@ -199,7 +199,7 @@ if True:
 
                 stress = stress_counter[lay][index]
 
-                print(f"FA[{lay}][{index}]: {stress} {[i/input_len for i in stress.values()]}")
+                log.println(f"FA[{lay}][{index}]: {stress} {[i/input_len for i in stress.values()]}")
 
                 try:
                     plt_y[lay][index].append(stress_counter[lay][index])
