@@ -434,12 +434,148 @@ class MPn_v2:
         return self.__output
 
 
+# supports 2's compliment numbers
+class MPn_v3:
+    def __init__(self, A: list[int], B: list[int], in_len=8) -> None:
+        self.in_len = in_len
+        self.A = A.copy()
+        self.B = B.copy()
+        self.__output = [N for _ in range(in_len*2)]
+
+        self.gfa = [[FA() for _ in range(in_len)] for _ in range(in_len-1)]
+        self.gfa_carry_out = FA()
+        self.gand = [[And() for _ in range(in_len)] for _ in range(in_len)]
+
+        self.elements = []
+        for i in self.gfa:
+            self.elements += i
+        for i in self.gand:
+            self.elements += i
+        self.elements += [self.gfa_carry_out]
+
+    
+    def netlist(self):
+        
+        # AND input map
+        for lay in range(self.in_len):
+            for i in range(self.in_len):
+                self.gand[lay][i].A = self.A[i]
+                self.gand[lay][i].B = self.B[lay]
+
+        # FA input map
+        for lay in range(self.in_len-1):
+            for i in range(self.in_len):
+                
+                __A = self.gand[lay+1][i].output
+                if (lay != self.in_len -1 -1) and (i == self.in_len -1):
+                    __A = H if __A==L else L
+                elif (lay == self.in_len -1 -1) and (i != self.in_len -1):
+                    __A = H if __A==L else L
+
+                if lay == 0:
+                    __B = self.gand[0][i+1].output if (i!=self.in_len-1) else H
+                    if (i == self.in_len -1 -1):
+                        __B = H if __B==L else L
+                else:
+                    __B = self.gfa[lay-1][i+1].sum if (i!=self.in_len-1) else self.gfa[lay-1][i].carry
+                __C = self.gfa[lay][i-1].carry if (i!=0) else L
+
+                self.gfa[lay][i].A = __A
+                self.gfa[lay][i].B = __B
+                self.gfa[lay][i].C = __C
+        
+        self.gfa_carry_out.A = L
+        self.gfa_carry_out.B = H
+        self.gfa_carry_out.C = self.gfa[self.in_len -1 -1][self.in_len -1].carry
+
+        # OUT map
+        self.__output[0] = self.gand[0][0].output
+        for lay in range(self.in_len -1):
+            self.__output[lay + 1] = self.gfa[lay][0].sum
+
+            # last layer
+            if lay == self.in_len - 2:
+                for i in range(self.in_len + 1):
+                    # self.__output[lay + i + 1] = self.gfa[lay][i].sum if (i!=self.in_len) else self.gfa[lay][i-1].carry
+                    self.__output[lay + i + 1] = self.gfa[lay][i].sum if (i!=self.in_len) else self.gfa_carry_out.sum
 
 
+    @property
+    def change_flag(self):
+        return any([i.change_flag for i in self.elements])
+    
+    @property
+    def output(self):
+        self.netlist()
+        while self.change_flag:
+            self.netlist()
+        return self.__output
+
+
+from log import Log
+log = Log("Multiplier.txt", terminal=True)
 
 def __test_MP4():
     pass
 
+def __test_MPn_v2():
+    def b(num: int, bit_len: int):
+        if num < 0:
+            # num = 2**bit_len - abs(num)
+            num = 2**bit_len + num
+        return list(map(int, reversed(format(num, f'0{bit_len}b'))))
+
+    def reverse_b(binary_list):
+        binary_str = ''.join(map(str, reversed(binary_list)))
+        num = int(binary_str, 2)
+        return num
+
+
+    bit_len = 4
+    for i in range(2**bit_len):
+        for j in range(2**bit_len):
+            output = reverse_b(
+                MPn_v2(b(i,bit_len), b(j, bit_len), bit_len).output
+            )
+            if output != (i*j):
+                return False 
+    return True
+
+def __test_MPn_v3():
+    def signed_b(num: int, bit_len: int):
+        num_cpy = num
+        if num < 0:
+            # num = 2**bit_len - abs(num)
+            num_cpy = 2**bit_len + num
+        bit_num = list(map(int, reversed(format(num_cpy, f'0{bit_len}b'))))
+
+        if (num>0) and (bit_num[-1] != 0):
+            raise OverflowError(f"number {num} cant fit in signed #{bit_len} bits")
+        if (num<0) and (bit_num[-1] != 1):
+            raise OverflowError(f"number {num} cant fit in signed #{bit_len} bits")
+        return bit_num
+
+    def reverse_signed_b(binary_list):
+        binary_str = ''.join(map(str, reversed(binary_list)))
+        num = int(binary_str, 2)
+
+        #number is negative
+        if binary_list[-1] == 1:
+            num = num - (2**len(binary_list))
+        return num
+    
+    bit_len = 4
+    _range = range(-1*2**(bit_len-1), 2**(bit_len-1))
+    for i in _range:
+        for j in _range:
+            output_bin = MPn_v3(signed_b(i,bit_len), signed_b(j, bit_len), bit_len).output
+            output = reverse_signed_b(output_bin)
+
+            log.println(f"{i} ({signed_b(i, bit_len)}) * {j} ({signed_b(j, bit_len)}) = {output} ({output_bin})")
+            if output != (i*j):
+                log.println("[FAILED] (return False)")
+                return False 
+    return True
 
 if __name__ == "__main__":
 
@@ -470,6 +606,9 @@ if __name__ == "__main__":
     print("### test FA")
     test_FA()
     print("### test FA DONE")
+
+    # print(f"### test MPn_v2: {__test_MPn_v2()}")
+    print(f"### test MPn_v3: {__test_MPn_v3()}")
 
         
 
