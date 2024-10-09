@@ -512,8 +512,8 @@ class MPn_v3:
         return self.__output
 
 
-from log import Log
-log = Log("Multiplier.txt", terminal=True)
+# from log import Log
+# log = Log("Multiplier.txt", terminal=True)
 
 def __test_MP4():
     pass
@@ -564,16 +564,16 @@ def __test_MPn_v3():
             num = num - (2**len(binary_list))
         return num
     
-    bit_len = 4
+    bit_len = 6
     _range = range(-1*2**(bit_len-1), 2**(bit_len-1))
     for i in _range:
         for j in _range:
             output_bin = MPn_v3(signed_b(i,bit_len), signed_b(j, bit_len), bit_len).output
             output = reverse_signed_b(output_bin)
 
-            log.println(f"{i} ({signed_b(i, bit_len)}) * {j} ({signed_b(j, bit_len)}) = {output} ({output_bin})")
+            # log.println(f"{i} ({signed_b(i, bit_len)}) * {j} ({signed_b(j, bit_len)}) = {output} ({output_bin})")
             if output != (i*j):
-                log.println("[FAILED] (return False)")
+                # log.println("[FAILED] (return False)")
                 return False 
     return True
 
