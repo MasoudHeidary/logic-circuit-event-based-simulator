@@ -131,32 +131,33 @@ if __name__ == "__main__":
 
 
     log = log.Log(name=f"log-main_improving_aging_1.txt", terminal=True)
-    _note = \
-    """
-        ######################### OPTIMIZER
-        # do not optimize these numbers
-        if OPTIMIZER_ENABLE:
-            if (A == -1*2**(bit_len-1)) or (B == -1*2**(bit_len-1)):
-                pass
-            else:
-                if (mp.gfa[1][7].tgate[0].p1.gate == L):
-                    neg_A = -A
-                    neg_B = -B
-                    neg_mp = MPn_v3(
-                        signed_b(neg_A, bit_len),
-                        signed_b(neg_B, bit_len),
-                        bit_len
-                    )
-                    neg_mp.output
+    log.println()
+    # _note = \
+    # """
+    #     ######################### OPTIMIZER
+    #     # do not optimize these numbers
+    #     if OPTIMIZER_ENABLE:
+    #         if (A == -1*2**(bit_len-1)) or (B == -1*2**(bit_len-1)):
+    #             pass
+    #         else:
+    #             if (mp.gfa[1][7].tgate[0].p1.gate == L):
+    #                 neg_A = -A
+    #                 neg_B = -B
+    #                 neg_mp = MPn_v3(
+    #                     signed_b(neg_A, bit_len),
+    #                     signed_b(neg_B, bit_len),
+    #                     bit_len
+    #                 )
+    #                 neg_mp.output
 
-                    if (neg_mp.gfa[1][7].tgate[0].p1.gate == H) or (neg_mp.gfa[0][5].tgate[0].p0.gate == H):
-                        mp = neg_mp
-                        optimized_flag = True
-                        # log.println(f"{A} * {B}, [optimizer: {optimized_flag}]")
+    #                 if (neg_mp.gfa[1][7].tgate[0].p1.gate == H) or (neg_mp.gfa[0][5].tgate[0].p0.gate == H):
+    #                     mp = neg_mp
+    #                     optimized_flag = True
+    #                     # log.println(f"{A} * {B}, [optimizer: {optimized_flag}]")
 
-        ######################### /OPTIMIZER
-    """
-    log.println(_note)
+    #     ######################### /OPTIMIZER
+    # """
+    # log.println(_note)
 
     input_numbers = yield_full_MP_signed_input_number(bit_len)
     # input_numbers = yield_cut_MP_signed_input_number(bit_len)
@@ -181,12 +182,31 @@ if __name__ == "__main__":
         mp.output
 
         ######################### OPTIMIZER
-        # do not optimize these numbers
+        # if OPTIMIZER_ENABLE:
+        #     if (A == -1*2**(bit_len-1)) or (B == -1*2**(bit_len-1)):
+        #         pass
+        #     else:
+        #         if (mp.gfa[1][7].tgate[0].p1.gate == L):
+        #             neg_A = -A
+        #             neg_B = -B
+        #             neg_mp = MPn_v3(
+        #                 signed_b(neg_A, bit_len),
+        #                 signed_b(neg_B, bit_len),
+        #                 bit_len
+        #             )
+        #             neg_mp.output
+
+        #             if (neg_mp.gfa[1][7].tgate[0].p1.gate == H) or (neg_mp.gfa[0][5].tgate[0].p0.gate == H):
+        #                 mp = neg_mp
+        #                 optimized_flag = True
+        #                 # log.println(f"{A} * {B}, [optimizer: {optimized_flag}]")
+        #                 log.println(f"{signed_b(A, bit_len)} ({A})\t\t{signed_b(B, bit_len)} ({B})\t\t [OPTIMIZED FLAG: {optimized_flag}]")
+
         if OPTIMIZER_ENABLE:
             if (A == -1*2**(bit_len-1)) or (B == -1*2**(bit_len-1)):
                 pass
             else:
-                if (mp.gfa[1][7].tgate[0].p1.gate == L):
+                if (mp.gfa[2][3].tgate[0].p0.gate == L):
                     neg_A = -A
                     neg_B = -B
                     neg_mp = MPn_v3(
@@ -196,11 +216,12 @@ if __name__ == "__main__":
                     )
                     neg_mp.output
 
-                    if (neg_mp.gfa[1][7].tgate[0].p1.gate == H) or (neg_mp.gfa[0][5].tgate[0].p0.gate == H):
+                    if (neg_mp.gfa[2][3].tgate[0].p0.gate == H):
                         mp = neg_mp
                         optimized_flag = True
                         # log.println(f"{A} * {B}, [optimizer: {optimized_flag}]")
-                        log.println(f"{signed_b(A, bit_len)} ({A})\t\t{signed_b(B, bit_len)} ({B})\t\t [OPTIMIZED FLAG: {optimized_flag}]")
+                        # log.println(f"{signed_b(A, bit_len)} ({A})\t\t{signed_b(B, bit_len)} ({B})\t\t [OPTIMIZED FLAG: {optimized_flag}]")
+    
 
         ######################### /OPTIMIZER
 
