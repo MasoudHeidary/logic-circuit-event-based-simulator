@@ -156,9 +156,11 @@ if __name__ == "__main__":
 
 
     def optimizer_trigger(mp: MPn_v3):
-        return mp.gfa[2][3].tgate[0].p0.gate == L
+        # return mp.gfa[2][3].tgate[0].p0.gate == L
+        return False
     def optimizer_accept(mp: MPn_v3):
-        return mp.gfa[2][3].tgate[0].p0.gate == H
+        # return mp.gfa[2][3].tgate[0].p0.gate == H
+        return False
 
 
     start_time = time.time()
