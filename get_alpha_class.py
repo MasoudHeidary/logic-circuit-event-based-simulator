@@ -4,6 +4,8 @@ import os
 import random
 from Multiplier import MPn_v3, L, H
 
+MAX_PROCESSES = 20 #multiprocessing.cpu_count()
+
 class MultiplierStressTest:
     def __init__(self, bit_len, optimizer_trigger, optimizer_accept, optimizer_enable=True, queue_size=100_000_000):
         self.bit_len = bit_len
@@ -112,7 +114,7 @@ class MultiplierStressTest:
             p.start()
 
             # if len(processes) >= multiprocessing.cpu_count():
-            if len(processes) >= 20:
+            if len(processes) >= MAX_PROCESSES:
                 for p in processes:
                     p.join()
                     print(f"{random.random()} join")
